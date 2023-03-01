@@ -67,6 +67,7 @@ add_executable(nori
   include/nori/warp.h
 
   # Source code files
+  src/area.cpp
   src/bitmap.cpp
   src/block.cpp
   src/bvh.cpp
@@ -87,6 +88,7 @@ add_executable(nori
   src/scene.cpp
   src/ttest.cpp
   src/warp.cpp
+  src/whitted.cpp
   src/microfacet.cpp
   src/mirror.cpp
   src/dielectric.cpp

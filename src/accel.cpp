@@ -10,10 +10,10 @@
 NORI_NAMESPACE_BEGIN
 
 void Accel::addMesh(Mesh *mesh) {
-    if (m_mesh)
-        throw NoriException("Accel: only a single mesh is supported!");
-    m_mesh = mesh;
-    m_bbox = m_mesh->getBoundingBox();
+    // if (m_mesh)
+    //     throw NoriException("Accel: only a single mesh is supported!");
+    // m_mesh = mesh;
+    // m_bbox = m_mesh->getBoundingBox();
     m_bvh->addMesh(mesh);
 }
 

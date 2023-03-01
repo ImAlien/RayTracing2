@@ -9,6 +9,7 @@
 #include <nori/object.h>
 #include <nori/frame.h>
 #include <nori/bbox.h>
+#include <nori/dpdf.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -59,14 +60,23 @@ struct Intersection {
  * the specifics of how to create its contents (e.g. by loading from an
  * external file)
  */
+
+struct SampleMeshResult {
+        Point3f p;
+        Normal3f n;
+        float pdf;
+    };
 class Mesh : public NoriObject {
+    
 public:
     /// Release all memory
     virtual ~Mesh();
 
     /// Initialize internal data structures (called once by the XML parser)
     virtual void activate();
-
+    // get the sample point and pdf;
+    const DiscretePDF& getPdf() const { return m_disPdf; }
+    SampleMeshResult sampleSurfaceUniform(Sampler* sampler) const;
     /// Return the total number of triangles in this shape
     uint32_t getTriangleCount() const { return (uint32_t) m_F.cols(); }
 
@@ -164,6 +174,8 @@ protected:
     BSDF         *m_bsdf = nullptr;      ///< BSDF of the surface
     Emitter    *m_emitter = nullptr;     ///< Associated emitter, if any
     BoundingBox3f m_bbox;                ///< Bounding box of the mesh
+    float m_area;                  //表面积
+    DiscretePDF m_disPdf;          //每个三角形的pdf
 };
 
 NORI_NAMESPACE_END

@@ -26,6 +26,14 @@ void Mesh::activate() {
         m_bsdf = static_cast<BSDF *>(
             NoriObjectFactory::createInstance("diffuse", PropertyList()));
     }
+    m_area = 0.0f;//总面积
+    m_disPdf.reserve(getTriangleCount());
+    for (uint32_t i = 0; i < getTriangleCount(); i++) {
+        auto area = surfaceArea(i);
+        m_area += area;
+        m_disPdf.append(area);
+    }
+    m_disPdf.normalize();//别忘了归一化，不然总概率就不是1了
 }
 
 float Mesh::surfaceArea(uint32_t index) const {
@@ -128,6 +136,31 @@ std::string Mesh::toString() const {
         m_bsdf ? indent(m_bsdf->toString()) : std::string("null"),
         m_emitter ? indent(m_emitter->toString()) : std::string("null")
     );
+}
+SampleMeshResult Mesh::sampleSurfaceUniform(Sampler* sampler) const {
+  SampleMeshResult result;
+  uint32_t idx = m_disPdf.sample(sampler->next1D());//均匀随机一个三角形
+  //重心坐标
+  Point2f rng = sampler->next2D();//算重心坐标
+  float alpha = 1 - sqrt(1 - rng.x());
+  float beta = rng.y() * sqrt(1 - rng.x());
+  Point3f v0 = m_V.col(m_F(0, idx));
+  Point3f v1 = m_V.col(m_F(1, idx));
+  Point3f v2 = m_V.col(m_F(2, idx));
+  Point3f p = alpha * v0 + beta * v1 + (1 - alpha - beta) * v2;//用重心坐标插值出坐标
+  result.p = p;
+  if (m_N.size() != 0) {//如果有存法线
+    Point3f n0 = m_N.col(m_F(0, idx));
+    Point3f n1 = m_N.col(m_F(1, idx));
+    Point3f n2 = m_N.col(m_F(2, idx));
+    result.n = (alpha * n0 + beta * n1 + (1 - alpha - beta) * n2).normalized();//用重心坐标插值出法线
+  } else {
+    Vector3f e1 = v1 - v0;
+    Vector3f e2 = v2 - v0;
+    result.n = e1.cross(e2).normalized();//叉乘算法线
+  }
+  result.pdf = m_disPdf.getNormalization();
+  return result;
 }
 
 std::string Intersection::toString() const {
