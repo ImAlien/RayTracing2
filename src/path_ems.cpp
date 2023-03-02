@@ -2,7 +2,7 @@
  * @Author: Alien
  * @Date: 2023-03-02 15:19:36
  * @LastEditors: Alien
- * @LastEditTime: 2023-03-02 15:24:40
+ * @LastEditTime: 2023-03-03 00:18:06
  */
 #include <nori/integrator.h>
 #include <nori/scene.h>
@@ -44,7 +44,7 @@ class PathEms : public Integrator {
         // //color += Li * f * cosTheta * t;//叠加到最终结果上
         // //2021.12.6更新：之前没有除以均匀随机选取光源的pdf
         // color += Li * f * cosTheta * t / (1.0f / (float)scene->getEmitters().size());
-        // isDelta = 0;
+        isDelta = 0;
         for (auto light :scene->getEmitters()){
             EmitterQueryRecord lRec(its.p);
             Color3f Li = light->getEmitter()->sample(light, lRec, sampler);//光源上均匀采样
@@ -57,7 +57,7 @@ class PathEms : public Integrator {
             if (cosTheta < 0) {//去掉朝下半球去的情况
                 cosTheta = 0;
             }
-            color += Li * fr* cosTheta;
+            color += t*Li * fr* cosTheta;
         }
       } 
       else {
