@@ -2,7 +2,7 @@
  * @Author: Alien
  * @Date: 2023-03-01 22:55:22
  * @LastEditors: Alien
- * @LastEditTime: 2023-03-02 00:19:23
+ * @LastEditTime: 2023-03-02 11:45:18
  */
 #include <nori/integrator.h>
 #include <nori/scene.h>
@@ -25,6 +25,7 @@ class WhittedIntegrator : public Integrator {
       Le = its.mesh->getEmitter()->eval(lRecE);
     }
     Color3f totLi(0.0f);
+    if (its.mesh->getBSDF()->isDiffuse())
     for (auto light :scene->getEmitters()){
         EmitterQueryRecord lRec(its.p);
         Color3f Li = light->getEmitter()->sample(light, lRec, sampler);//光源上均匀采样
@@ -39,8 +40,15 @@ class WhittedIntegrator : public Integrator {
         }
         totLi += Li * fr* cosTheta;
     }
-    //auto light = scene->getRandomEmitter(sampler->next1D());//均匀随机一个光源
-    
+    else {//不是的话，递归
+      BSDFQueryRecord bRec(its.toLocal(-ray.d));
+      Color3f refColor = its.mesh->getBSDF()->sample(bRec, sampler->next2D());//采样一个出射方向
+      if (sampler->next1D() < 0.95 && refColor.x() > 0.f) {//递归终止条件
+        return Li(scene, sampler, Ray3f(its.p, its.toWorld(bRec.wo))) / 0.95 * refColor;
+      } else {
+        return Color3f(0.0f);
+      } 
+    }   
     return Le + totLi;
     //BSDFQueryRecord bRec(its.shFrame.toLocal(-ray.d));//入射方向是世界坐标，bsdf计算时在切线空间下
     //Color3f f = its.mesh->getBSDF()->sample(bRec, sampler->next2D());//就是公式中的fr
