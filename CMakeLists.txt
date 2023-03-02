@@ -84,6 +84,8 @@ add_executable(nori
   src/parser.cpp
   src/perspective.cpp
   src/proplist.cpp
+  src/path_mats.cpp
+  src/path_ems.cpp
   src/rfilter.cpp
   src/scene.cpp
   src/ttest.cpp
