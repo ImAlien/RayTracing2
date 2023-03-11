@@ -2,7 +2,7 @@
  * @Author: Alien
  * @Date: 2023-03-01 11:55:29
  * @LastEditors: Alien
- * @LastEditTime: 2023-03-01 22:47:32
+ * @LastEditTime: 2023-03-03 11:09:14
  */
 /*
     This file is part of Nori, a simple educational ray tracer
@@ -26,6 +26,8 @@ struct EmitterQueryRecord {
   Vector3f wi;//从着色点ref到光源p的方向
   float pdf;//采样点p的pdf
   Ray3f shadowRay;//检测遮挡的射线
+  /// UV coordinates, if any
+Point2f uv;
 
   EmitterQueryRecord(const Point3f& ref) : ref(ref) {}
 
